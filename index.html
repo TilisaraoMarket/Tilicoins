@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprar Tilicoins</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --color-principal: #2e1c80;
+            --precio-venta: #2ecc71;
+            --valor-canje: #e74c3c;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--color-principal);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .market-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .tilicoin-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .tilicoin-card img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+
+        .precio {
+            color: var(--precio-venta);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .valor-canje {
+            color: var(--valor-canje);
+            font-weight: bold;
+        }
+
+        .boton-compra {
+            background: var(--precio-venta);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .boton-whatsapp {
+            background: #25D366;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Comprar Tilicoins</h1>
+        <p>Adquiere tus Tilicoins y apoya a comercios locales</p>
+    </header>
+
+    <div class="container">
+        <div class="market-list" id="market">
+            <!-- Tilicoins se cargarán dinámicamente -->
+        </div>
+    </div>
+
+    <script>
+        // Cargar Tilicoins desde localStorage
+        const tilicoins = JSON.parse(localStorage.getItem('tilicoins')) || [];
+
+        // Función para detectar dispositivo
+        function detectarDispositivo() {
+            const ua = navigator.userAgent;
+            return {
+                android: /android/i.test(ua),
+                ios: /iphone|ipad|ipod/i.test(ua)
+            };
+        }
+
+        // Función para abrir Mercado Pago
+        function abrirMercadoPago(alias) {
+            const dispositivo = detectarDispositivo();
+            const esquemas = {
+                android: `intent://payments?params=${alias}#Intent;package=com.mercadopago.wallet;scheme=mercadopago;end;`,
+                ios: `mercadopago://payments?params=${alias}`,
+                web: `https://www.mercadopago.com.ar/activities?alias=${alias}`
+            };
+
+            try {
+                if (dispositivo.android) {
+                    window.location = esquemas.android;
+                    setTimeout(() => {
+                        window.location = 'market://details?id=com.mercadopago.wallet';
+                    }, 2500);
+                } else if (dispositivo.ios) {
+                    window.location = esquemas.ios;
+                    setTimeout(() => {
+                        window.location = 'itms-apps://itunes.apple.com/ar/app/mercado-pago/id925436649';
+                    }, 2500);
+                } else {
+                    window.open(esquemas.web, '_blank');
+                }
+            } catch (error) {
+                console.error('Error al abrir Mercado Pago:', error);
+                window.open(esquemas.web, '_blank');
+            }
+        }
+
+        // Función para copiar alias y abrir MP
+        function manejarCompra(alias) {
+            navigator.clipboard.writeText(alias).then(() => {
+                alert('Alias copiado: ' + alias + '\nRedirigiendo a Mercado Pago...');
+                abrirMercadoPago(alias);
+            }).catch(err => {
+                console.error('Error al copiar alias:', err);
+                abrirMercadoPago(alias);
+            });
+        }
+
+        // Función para mostrar los Tilicoins
+        function cargarTilicoins() {
+            const market = document.getElementById('market');
+            market.innerHTML = '';
+
+            tilicoins.forEach(tilicoin => {
+                const card = document.createElement('div');
+                card.className = 'tilicoin-card';
+                card.innerHTML = `
+                    <img src="${tilicoin.image || 'placeholder.png'}" alt="${tilicoin.nombre}">
+                    <h3>${tilicoin.nombre}</h3>
+                    <p class="precio">$9.000 COP</p>
+                    <p class="valor-canje">Valor de canje: $10.000 COP</p>
+                    <p>Comercio: ${tilicoin.nombreComercio}</p>
+                    <p>Alias MP: ${tilicoin.aliasMP}</p>
+                    
+                    <button class="boton-compra" 
+                       onclick="manejarCompra('${tilicoin.aliasMP}')">
+                        <i class="fas fa-shopping-cart"></i> Pagar con Mercado Pago
+                    </button>
+                    
+                    <a href="https://wa.me/${tilicoin.whatsapp}?text=Hola,%20quiero%20comprar%20tu%20Tilicoin" 
+                       class="boton-whatsapp" 
+                       target="_blank">
+                        <i class="fab fa-whatsapp"></i> Contactar al vendedor
+                    </a>
+                `;
+                market.appendChild(card);
+            });
+        }
+
+        // Cargar al iniciar
+        window.onload = cargarTilicoins;
+    </script>
+</body>
+</html>

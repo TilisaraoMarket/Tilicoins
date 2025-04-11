@@ -106,10 +106,124 @@
     </div>
 
     <script>
-        // Cargar Tilicoins desde localStorage
-        const tilicoins = JSON.parse(localStorage.getItem('tilicoins')) || [];
+        // Función para generar imagen de Tilicoin
+        function generarImagenTilicoin(nombre, precio, canje, color, patron) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400;
+            canvas.height = 400;
+            
+            // Diseño base
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, 180, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 5;
+            ctx.stroke();
 
-        // Función para detectar dispositivo
+            // Patrón de seguridad
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.lineWidth = 1;
+
+            // Dibujar patrón según tipo
+            switch(patron) {
+                case 'premium':
+                    for(let i = 0; i < 360; i += 5) dibujarLinea(ctx, i);
+                    dibujarCirculos(ctx, 8);
+                    break;
+                case 'standard':
+                    for(let i = 0; i < 360; i += 15) dibujarLinea(ctx, i);
+                    dibujarCirculos(ctx, 4);
+                    break;
+                case 'basic':
+                    for(let i = 0; i < 360; i += 30) dibujarLinea(ctx, i);
+                    dibujarCirculos(ctx, 2);
+                    break;
+            }
+
+            // Texto principal
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 28px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(nombre, canvas.width/2, canvas.height/2 - 20);
+            
+            // Detalles de valor
+            ctx.font = '24px Arial';
+            ctx.fillText(`Valor: $${precio.toLocaleString('es-CO')}`, canvas.width/2, canvas.height/2 + 20);
+            ctx.fillText(`Canje: $${canje.toLocaleString('es-CO')}`, canvas.width/2, canvas.height/2 + 60);
+
+            return canvas.toDataURL('image/png');
+        }
+
+        function dibujarLinea(ctx, grados) {
+            const radianes = grados * Math.PI / 180;
+            const x = ctx.canvas.width/2 + Math.cos(radianes) * 150;
+            const y = ctx.canvas.height/2 + Math.sin(radianes) * 150;
+            ctx.beginPath();
+            ctx.moveTo(ctx.canvas.width/2, ctx.canvas.height/2);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        function dibujarCirculos(ctx, cantidad) {
+            for(let i = 1; i <= cantidad; i++) {
+                ctx.beginPath();
+                ctx.arc(ctx.canvas.width/2, ctx.canvas.height/2, 180 - (i * 20), 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        // Tilicoins con imágenes generadas dinámicamente
+        const tilicoins = [
+            {
+                nombre: "Tilicoin Básico",
+                image: generarImagenTilicoin("Tilicoin Básico", 9000, 10000, "#4c1d95", "basic"),
+                nombreComercio: "Tienda Example 1",
+                aliasMP: "TIENDA.EXAMPLE1",
+                whatsapp: "573001234567"
+            },
+            {
+                nombre: "Tilicoin Premium",
+                image: generarImagenTilicoin("Tilicoin Premium", 18000, 20000, "#6d28d9", "premium"),
+                nombreComercio: "Tienda Example 2",
+                aliasMP: "TIENDA.EXAMPLE2",
+                whatsapp: "573009876543"
+            },
+            {
+                nombre: "Tilicoin Gold",
+                image: generarImagenTilicoin("Tilicoin Gold", 45000, 50000, "#fbbf24", "premium"),
+                nombreComercio: "Tienda Example 3",
+                aliasMP: "TIENDA.EXAMPLE3",
+                whatsapp: "573001112233"
+            },
+            {
+                nombre: "Tilicoin Silver",
+                image: generarImagenTilicoin("Tilicoin Silver", 27000, 30000, "#94a3b8", "standard"),
+                nombreComercio: "Tienda Example 4",
+                aliasMP: "TIENDA.EXAMPLE4",
+                whatsapp: "573004445566"
+            },
+            {
+                nombre: "Tilicoin Estándar",
+                image: generarImagenTilicoin("Tilicoin Estándar", 9000, 10000, "#2e1c80", "standard"),
+                nombreComercio: "Mi Tilicoin",
+                aliasMP: "MI.TILICOIN",
+                whatsapp: "573000000000"
+            }
+        ];
+
+        // Precios por tipo de Tilicoin con colores y patrones
+        const precios = {
+            "Tilicoin Básico": { venta: 9000, canje: 10000, color: "#4c1d95", patron: "basic" },
+            "Tilicoin Premium": { venta: 18000, canje: 20000, color: "#6d28d9", patron: "premium" },
+            "Tilicoin Gold": { venta: 45000, canje: 50000, color: "#fbbf24", patron: "premium" },
+            "Tilicoin Silver": { venta: 27000, canje: 30000, color: "#94a3b8", patron: "standard" },
+            "Tilicoin Bronze": { venta: 13500, canje: 15000, color: "#b45309", patron: "basic" },
+            "Tilicoin Plus": { venta: 36000, canje: 40000, color: "#0891b2", patron: "premium" },
+            "Tilicoin Estándar": { venta: 9000, canje: 10000, color: "#2e1c80", patron: "standard" }
+        };
+
         function detectarDispositivo() {
             const ua = navigator.userAgent;
             return {
@@ -118,7 +232,6 @@
             };
         }
 
-        // Función para abrir Mercado Pago
         function abrirMercadoPago(alias) {
             const dispositivo = detectarDispositivo();
             const esquemas = {
@@ -147,7 +260,6 @@
             }
         }
 
-        // Función para copiar alias y abrir MP
         function manejarCompra(alias) {
             navigator.clipboard.writeText(alias).then(() => {
                 alert('Alias copiado: ' + alias + '\nRedirigiendo a Mercado Pago...');
@@ -158,19 +270,24 @@
             });
         }
 
-        // Función para mostrar los Tilicoins
         function cargarTilicoins() {
             const market = document.getElementById('market');
             market.innerHTML = '';
 
+            if (tilicoins.length === 0) {
+                market.innerHTML = '<p>No hay Tilicoins disponibles en este momento.</p>';
+                return;
+            }
+
             tilicoins.forEach(tilicoin => {
+                const precio = precios[tilicoin.nombre] || { venta: 9000, canje: 10000, color: "#2e1c80", patron: "standard" };
                 const card = document.createElement('div');
                 card.className = 'tilicoin-card';
                 card.innerHTML = `
-                    <img src="${tilicoin.image || 'placeholder.png'}" alt="${tilicoin.nombre}">
+                    <img src="${tilicoin.image || generarImagenTilicoin(tilicoin.nombre, precio.venta, precio.canje, precio.color, precio.patron)}" alt="${tilicoin.nombre}">
                     <h3>${tilicoin.nombre}</h3>
-                    <p class="precio">$9.000 COP</p>
-                    <p class="valor-canje">Valor de canje: $10.000 COP</p>
+                    <p class="precio">$${precio.venta.toLocaleString('es-CO')} COP</p>
+                    <p class="valor-canje">Valor de canje: $${precio.canje.toLocaleString('es-CO')} COP</p>
                     <p>Comercio: ${tilicoin.nombreComercio}</p>
                     <p>Alias MP: ${tilicoin.aliasMP}</p>
                     

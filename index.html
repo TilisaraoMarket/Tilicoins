@@ -11,52 +11,82 @@
             --precio-venta: #2ecc71;
             --valor-canje: #e74c3c;
         }
+
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f8f9fa;
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+
         .header {
             background: var(--color-principal);
             color: white;
             padding: 2rem;
             text-align: center;
+            transition: background-color 0.3s ease;
         }
+
+        .header:hover {
+            background-color: #3d2a99;
+        }
+
         .market-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             margin-top: 2rem;
         }
+
         .tilicoin-card {
             background: white;
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             text-align: center;
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
         }
+
+        .tilicoin-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+        }
+
         .tilicoin-card img {
             max-width: 200px;
             height: auto;
             border-radius: 50%;
             margin-bottom: 1rem;
         }
+
         .precio {
             color: var(--precio-venta);
             font-size: 1.5rem;
             font-weight: bold;
             margin: 1rem 0;
+            transition: transform 0.2s ease;
         }
+
+        .tilicoin-card:hover .precio {
+            transform: scale(1.05);
+        }
+
         .valor-canje {
             color: var(--valor-canje);
             font-weight: bold;
+            transition: transform 0.2s ease;
         }
+
+        .tilicoin-card:hover .valor-canje {
+            transform: scale(1.05);
+        }
+
         .boton-compra {
             background: var(--precio-venta);
             color: white;
@@ -68,7 +98,14 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
+
+        .boton-compra:hover {
+            transform: translateY(-2px);
+            background-color: #27ae60;
+        }
+
         .boton-whatsapp {
             background: #25D366;
             color: white;
@@ -79,6 +116,34 @@
             align-items: center;
             gap: 0.5rem;
             margin-top: 1rem;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .boton-whatsapp:hover {
+            transform: translateY(-2px);
+            background-color: #128C7E;
+        }
+
+        /* Estilos para la notificación */
+        #notificacion {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+            display: none; /* Ocultar por defecto */
+        }
+
+        #notificacion.mostrar {
+            display: block;
+            opacity: 1;
         }
     </style>
 </head>
@@ -87,18 +152,21 @@
         <h1>Comprar Tilicoins</h1>
         <p>Adquiere tus Tilicoins y apoya a comercios locales</p>
     </header>
+
     <div class="container">
         <div class="market-list" id="market">
             <!-- Tilicoins se cargarán dinámicamente -->
         </div>
     </div>
+
     <script>
-        // Función para generar la imagen del Tilicoin
+        // Función para generar imagen de Tilicoin
         function generarImagenTilicoin(nombre, precio, canje, color, patron) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = 400;
             canvas.height = 400;
+            
             // Diseño base
             ctx.beginPath();
             ctx.arc(canvas.width/2, canvas.height/2, 180, 0, Math.PI * 2);
@@ -107,9 +175,12 @@
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 5;
             ctx.stroke();
+
             // Patrón de seguridad
             ctx.strokeStyle = 'rgba(255,255,255,0.2)';
             ctx.lineWidth = 1;
+
+            // Dibujar patrón según tipo
             switch(patron) {
                 case 'premium':
                     for(let i = 0; i < 360; i += 5) dibujarLinea(ctx, i);
@@ -124,16 +195,21 @@
                     dibujarCirculos(ctx, 2);
                     break;
             }
+
             // Texto principal
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 28px Arial';
             ctx.textAlign = 'center';
             ctx.fillText(nombre, canvas.width/2, canvas.height/2 - 20);
+            
+            // Detalles de valor
             ctx.font = '24px Arial';
             ctx.fillText(`Valor: $${precio.toLocaleString('es-CO')}`, canvas.width/2, canvas.height/2 + 20);
             ctx.fillText(`Canje: $${canje.toLocaleString('es-CO')}`, canvas.width/2, canvas.height/2 + 60);
+
             return canvas.toDataURL('image/png');
         }
+
         function dibujarLinea(ctx, grados) {
             const radianes = grados * Math.PI / 180;
             const x = ctx.canvas.width/2 + Math.cos(radianes) * 150;
@@ -143,6 +219,7 @@
             ctx.lineTo(x, y);
             ctx.stroke();
         }
+
         function dibujarCirculos(ctx, cantidad) {
             for(let i = 1; i <= cantidad; i++) {
                 ctx.beginPath();
@@ -150,7 +227,8 @@
                 ctx.stroke();
             }
         }
-        // Definición de los Tilicoins
+
+        // Tilicoins con imágenes generadas dinámicamente
         const tilicoins = [
             {
                 nombre: "Tilicoin Básico",
@@ -188,6 +266,8 @@
                 whatsapp: "573000000000"
             }
         ];
+
+        // Precios por tipo de Tilicoin con colores y patrones
         const precios = {
             "Tilicoin Básico": { venta: 9000, canje: 10000, color: "#4c1d95", patron: "basic" },
             "Tilicoin Premium": { venta: 18000, canje: 20000, color: "#6d28d9", patron: "premium" },
@@ -197,6 +277,7 @@
             "Tilicoin Plus": { venta: 36000, canje: 40000, color: "#0891b2", patron: "premium" },
             "Tilicoin Estándar": { venta: 9000, canje: 10000, color: "#2e1c80", patron: "standard" }
         };
+
         function detectarDispositivo() {
             const ua = navigator.userAgent;
             return {
@@ -204,44 +285,107 @@
                 ios: /iphone|ipad|ipod/i.test(ua)
             };
         }
-        // Función modificada: Se abre la app de Mercado Pago sin redireccionar a la Play Store o App Store
+
+        
         function abrirMercadoPago(alias) {
             const dispositivo = detectarDispositivo();
             const esquemas = {
-                android: `intent://payments?params=${alias}#Intent;package=com.mercadopago.wallet;scheme=mercadopago;end;`,
-                ios: `mercadopago://payments?params=${alias}`,
+                android: {
+                    intent: `intent://payments?params=${alias}#Intent;package=com.mercadopago.wallet;scheme=mercadopago;end;`,
+                    app: `mercadopago://payments?params=${alias}`,
+                    playStore: 'market://details?id=com.mercadopago.wallet',
+                    webPlayStore: 'https://play.google.com/store/apps/details?id=com.mercadopago.wallet'
+                },
+                ios: {
+                    app: `mercadopago://payments?params=${alias}`,
+                    universalLink: `https://www.mercadopago.com.ar/payments?params=${alias}`,
+                    appStore: 'itms-apps://itunes.apple.com/ar/app/mercado-pago/id925436649',
+                    webAppStore: 'https://apps.apple.com/ar/app/mercado-pago/id925436649'
+                },
                 web: `https://www.mercadopago.com.ar/activities?alias=${alias}`
             };
+
+            const handleFallback = (fallbackUrl, webFallback) => {
+                const startTime = Date.now();
+                const timeoutDuration = 2500;
+
+                setTimeout(() => {
+                    // Solo redirigir si el usuario no ha salido de la página
+                    if (document.hidden || Date.now() - startTime >= timeoutDuration) {
+                        return;
+                    }
+                    try {
+                        window.location.href = fallbackUrl;
+                    } catch (error) {
+                        console.error('Error en fallback:', error);
+                        window.location.href = webFallback;
+                    }
+                }, timeoutDuration);
+            };
+
             try {
                 if (dispositivo.android) {
-                    // Solo se redirige usando el esquema intent para abrir la app
-                    window.location.href = esquemas.android;
+                    // Intentar primero con el intent
+                    window.location.href = esquemas.android.intent;
+                    handleFallback(esquemas.android.playStore, esquemas.android.webPlayStore);
                 } else if (dispositivo.ios) {
-                    window.location.href = esquemas.ios;
+                    // En iOS, intentar primero con Universal Links
+                    window.location.href = esquemas.ios.universalLink;
+                    // Fallback al esquema URL personalizado
+                    setTimeout(() => {
+                        window.location.href = esquemas.ios.app;
+                        handleFallback(esquemas.ios.appStore, esquemas.ios.webAppStore);
+                    }, 1000);
                 } else {
                     window.open(esquemas.web, '_blank');
                 }
             } catch (error) {
                 console.error('Error al abrir Mercado Pago:', error);
+                mostrarNotificacion('Error al abrir Mercado Pago. Intenta de nuevo.');
                 window.open(esquemas.web, '_blank');
             }
         }
-        function manejarCompra(alias) {
-            navigator.clipboard.writeText(alias).then(() => {
-                alert('Alias copiado: ' + alias + '\nRedirigiendo a Mercado Pago...');
-                abrirMercadoPago(alias);
-            }).catch(err => {
-                console.error('Error al copiar alias:', err);
-                abrirMercadoPago(alias);
-            });
+
+        // Función auxiliar para mostrar notificaciones
+        function mostrarNotificacion(mensaje, duracion = 3000) {
+            const notificacion = document.getElementById('notificacion') || crearElementoNotificacion();
+            notificacion.textContent = mensaje;
+            notificacion.classList.add('mostrar');
+            
+            setTimeout(() => {
+                notificacion.classList.remove('mostrar');
+            }, duracion);
         }
+
+        function crearElementoNotificacion() {
+            const notificacion = document.createElement('div');
+            notificacion.id = 'notificacion';
+            document.body.appendChild(notificacion);
+            return notificacion;
+        }
+
+        function manejarCompra(alias) {
+            navigator.clipboard.writeText(alias)
+                .then(() => {
+                    mostrarNotificacion('Alias copiado. Abriendo Mercado Pago...');
+                    abrirMercadoPago(alias);
+                })
+                .catch(err => {
+                    console.error('Error al copiar alias:', err);
+                    mostrarNotificacion('Error al copiar el alias. Intenta de nuevo.');
+                    abrirMercadoPago(alias);
+                });
+        }
+
         function cargarTilicoins() {
             const market = document.getElementById('market');
             market.innerHTML = '';
+
             if (tilicoins.length === 0) {
                 market.innerHTML = '<p>No hay Tilicoins disponibles en este momento.</p>';
                 return;
             }
+
             tilicoins.forEach(tilicoin => {
                 const precio = precios[tilicoin.nombre] || { venta: 9000, canje: 10000, color: "#2e1c80", patron: "standard" };
                 const card = document.createElement('div');
@@ -253,16 +397,23 @@
                     <p class="valor-canje">Valor de canje: $${precio.canje.toLocaleString('es-CO')} COP</p>
                     <p>Comercio: ${tilicoin.nombreComercio}</p>
                     <p>Alias MP: ${tilicoin.aliasMP}</p>
-                    <button class="boton-compra" onclick="manejarCompra('${tilicoin.aliasMP}')">
+                    
+                    <button class="boton-compra" 
+                       onclick="manejarCompra('${tilicoin.aliasMP}')">
                         <i class="fas fa-shopping-cart"></i> Pagar con Mercado Pago
                     </button>
-                    <a href="https://wa.me/${tilicoin.whatsapp}?text=Hola,%20quiero%20comprar%20tu%20Tilicoin" class="boton-whatsapp" target="_blank">
+                    
+                    <a href="https://wa.me/${tilicoin.whatsapp}?text=Hola,%20quiero%20comprar%20tu%20Tilicoin" 
+                       class="boton-whatsapp" 
+                       target="_blank">
                         <i class="fab fa-whatsapp"></i> Contactar al vendedor
                     </a>
                 `;
                 market.appendChild(card);
             });
         }
+
+        // Cargar al iniciar
         window.onload = cargarTilicoins;
     </script>
 </body>

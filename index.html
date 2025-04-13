@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -214,6 +215,45 @@
         .submit-button:hover {
             background-color: #16a34a;
         }
+        /* Estilos para la sección de comercios */
+        .commerce-section {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .commerce-section h2 {
+            color: #2e1c80;
+            margin-bottom: 1rem;
+        }
+        .commerce-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .commerce-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .commerce-card:hover {
+            transform: translateY(-3px);
+        }
+        .commerce-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+        .commerce-card a {
+            text-decoration: none;
+            color: var(--color-principal);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -244,18 +284,26 @@
             </ol>
         </section>
 
-    <div class="container">
-        <div class="market-list" id="market">
-            <!-- Tilicoins se cargarán dinámicamente -->
+        <div class="container">
+            <div class="market-list" id="market">
+                <!-- Tilicoins se cargarán dinámicamente -->
+            </div>
+            <button onclick="mostrarFormularioContacto()" class="boton-compra add-commerce-button">
+                <i class="fas fa-plus"></i> Agregar mi Comercio
+            </button>
         </div>
-        <button onclick="mostrarFormularioContacto()" class="boton-compra add-commerce-button">
-            <i class="fas fa-plus"></i> Agregar mi Comercio
-        </button>
+
+        <!-- Sección para listar comercios -->
+        <section class="commerce-section">
+            <h2>Nuestros Comercios</h2>
+            <div class="commerce-list" id="commerceList">
+                <!-- Se cargan las tarjetas de cada comercio -->
+            </div>
+        </section>
+
+        <div id="contact-form-container" style="display: none;"></div>
+        <div id="notificacion"></div>
     </div>
-
-    <div id="contact-form-container" style="display: none;"></div>
-    <div id="notificacion"></div>
-
     <script>
         // Función para generar imagen de Tilicoin
         function generarImagenTilicoin(nombre, precio, canje, color, patron) {
@@ -299,7 +347,6 @@
             ctx.fillText(`Canje: $${canje.toLocaleString('es-CO')}`, canvas.width / 2, canvas.height / 2 + 60);
             return canvas.toDataURL('image/png');
         }
-
         function dibujarLinea(ctx, grados) {
             const radianes = grados * Math.PI / 180;
             const x = ctx.canvas.width / 2 + Math.cos(radianes) * 150;
@@ -327,18 +374,18 @@
                 whatsapp: "573001234567"
             },
             {
+                nombre: "Tilicoin Bronze",
+                image: generarImagenTilicoin("Tilicoin Bronze", 13500, 15000, "#b45309", "premium"),
+                nombreComercio: "Tienda Example 3",
+                aliasMP: "TIENDA.EXAMPLE3",
+                whatsapp: "573001112233"
+            },
+            {
                 nombre: "Tilicoin Premium",
                 image: generarImagenTilicoin("Tilicoin Premium", 18000, 20000, "#6d28d9", "premium"),
                 nombreComercio: "Tienda Example 2",
                 aliasMP: "TIENDA.EXAMPLE2",
                 whatsapp: "573009876543"
-            },
-            {
-                nombre: "Tilicoin Gold",
-                image: generarImagenTilicoin("Tilicoin Gold", 45000, 50000, "#fbbf24", "premium"),
-                nombreComercio: "Tienda Example 3",
-                aliasMP: "TIENDA.EXAMPLE3",
-                whatsapp: "573001112233"
             },
             {
                 nombre: "Tilicoin Silver",
@@ -348,14 +395,14 @@
                 whatsapp: "573004445566"
             },
             {
-                nombre: "Tilicoin Estándar",
-                image: generarImagenTilicoin("Tilicoin Estándar", 9000, 10000, "#2e1c80", "standard"),
-                nombreComercio: "Mi Tilicoin",
-                aliasMP: "MI.TILICOIN",
-                whatsapp: "573000000000"
-            }
+                nombre: "Tilicoin Gold",
+                image: generarImagenTilicoin("Tilicoin Gold", 45000, 50000, "#fbbf24", "premium"),
+                nombreComercio: "Tienda Example 3",
+                aliasMP: "TIENDA.EXAMPLE3",
+                whatsapp: "573001112233"
+            },
         ];
-
+            
         // Precios por tipo de Tilicoin con colores y patrones
         const precios = {
             "Tilicoin Básico": { venta: 9000, canje: 10000, color: "#4c1d95", patron: "basic" },
@@ -517,7 +564,44 @@
                 market.appendChild(card);
             });
         }
-        window.onload = cargarTilicoins;
+        // Función para cargar los comercios y redirigir a sus páginas específicas
+        function cargarComercios() {
+            const commerceList = document.getElementById('commerceList');
+            commerceList.innerHTML = '';
+            // Arreglo de comercios
+            const comercios = [
+                {
+                    nombre: "Mi Gran Verdulería",
+                    imagen: "logo-verduleria.png",
+                    enlace: "mi gran verduleria.html"
+                },
+                {
+                    nombre: "Panadería La Delicia",
+                    imagen: "https://via.placeholder.com/300x200?text=Panadería+La+Delicia",
+                    enlace: "panaderia.html"
+                },
+                {
+                    nombre: "Librería El Saber",
+                    imagen: "https://via.placeholder.com/300x200?text=Librería+El+Saber",
+                    enlace: "libreria.html"
+                }
+            ];
+            comercios.forEach(comercio => {
+                const card = document.createElement('div');
+                card.className = 'commerce-card';
+                card.innerHTML = `
+                    <img src="${comercio.imagen}" alt="${comercio.nombre}">
+                    <h3>${comercio.nombre}</h3>
+                    <a href="${comercio.enlace}">Entrar a Tilicoins</a>
+                `;
+                commerceList.appendChild(card);
+            });
+        }
+        // Llamamos a ambas funciones al cargar la ventana
+        window.onload = function() {
+            cargarTilicoins();
+            cargarComercios();
+        }
     </script>
 </body>
 </html>
